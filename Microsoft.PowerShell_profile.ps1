@@ -4,6 +4,9 @@
 # PSReadLine stuff
 . $PSScriptRoot\psreadline.ps1
 
+# Encode-Video cmdlet to... encode videos!
+. $PSScriptRoot\encode-video.ps1
+
 # Rustup completions
 # Update by running:
 #   rm ${env:USERPROFILE}\Documents\WindowsPowerShell\rustup_completions.ps1
