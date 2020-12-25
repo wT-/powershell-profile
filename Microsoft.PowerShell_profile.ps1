@@ -7,6 +7,9 @@
 # Encode-Video cmdlet to... encode videos!
 . $PSScriptRoot\encode-video.ps1
 
+# Cmdlet to copy file created/modified dates over from $source to $target
+. $PSScriptRoot\copy-times.ps1
+
 # Rustup completions
 # Update by running:
 #   rm ${env:USERPROFILE}\Documents\WindowsPowerShell\rustup_completions.ps1
