@@ -193,7 +193,9 @@ function Compress-Video {
             }
             # break
         }
+    }
 
+    End {
         Log-Message "Done."
     }
 }
