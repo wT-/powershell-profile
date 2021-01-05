@@ -1,3 +1,22 @@
+# TODO: Let me input a file that has paths to everything I wanna re-encode:
+#     Check https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-content?view=powershell-7
+#      -> Reads file contents and spits it out line-by-line
+#     Maybe use "Begin{}"/"Process{}"/"End{}" blocks.
+#      -> Figure out files to process in Begin
+#       Either from file or from Get-ChildItem
+#      -> Process the list of files Process
+# TODO: Support symlinks:
+#     At least file-size checking is broken as symlinks show up as 0 bytes
+#     What else?
+# TODO: Select preset with a flag like -slow or -slower
+#     Needs to be mutually exclusive
+#     Having ParameterSets for h264 and h265 complicates things. Can a parameter be in two sets at the same time?
+#     Need to have mutually exclusive sets for both profiles and h264/h265
+# FIXME: Recurse doesn't work. The output dir is determined at the start instead of in each directory
+#     Maybe that doesn't make sense either... in any case, it doesn't work right now.
+# TODO: Add support for pipelining
+
+
 function Log-Message {
     Param
     (
@@ -63,23 +82,6 @@ function Compress-Video {
     .SYNOPSIS
         Encode video(s) in $Target with FFMPEG to $Scale at CRF of $CRF with 96k AAC audio using either -h264 or -h265 (default)
     #>
-
-    # TODO: Let me input a file that has paths to everything I wanna re-encode:
-    #     Check https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-content?view=powershell-7
-    #      -> Reads file contents and spits it out line-by-line
-    #     Maybe use "Begin{}"/"Process{}"/"End{}" blocks.
-    #      -> Figure out files to process in Begin
-    #       Either from file or from Get-ChildItem
-    #      -> Process the list of files Process
-    # TODO: Support symlinks:
-    #     At least file-size checking is broken as symlinks show up as 0 bytes
-    #     What else?
-    # TODO: Select preset with a flag like -slow or -slower
-    #     Needs to be mutually exclusive
-    #     Having ParameterSets for h264 and h265 complicates things. Can a parameter be in two sets at the same time?
-    #     Need to have mutually exclusive sets for both profiles and h264/h265
-    # FIXME: Recurse doesn't work. The output dir is determined at the start instead of in each directory
-    #     Maybe that doesn't make sense either... in any case, it doesn't work right now.
 
     [CmdletBinding(DefaultParameterSetName="h265")]
     Param (
