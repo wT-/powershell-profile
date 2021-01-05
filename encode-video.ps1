@@ -4,7 +4,6 @@ function Encode-Video {
         Encode video(s) in $Target with FFMPEG to $Scale at CRF of $CRF with 96k AAC audio using either -h264 or -h265 (default)
     #>
 
-    # TODO: Variable naming is a mess of kebab, pascal and snake-case
     # TODO: Let me input a file that has paths to everything I wanna re-encode:
     #     Check https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-content?view=powershell-7
     #      -> Reads file contents and spits it out line-by-line
@@ -35,7 +34,7 @@ function Encode-Video {
         # Downscale video to maximum of this many vertical pixels, for example "1080"
         [int64]$Scale,
         # Recurse in to subdirs. Probably unwanted most of the time
-        [switch]$recurse = $false,
+        [switch]$Recurse = $false,
         # Mutually exclusive swithes to determine target encoding library
         [Parameter(ParameterSetName="h264")]
         [switch]$h264,
@@ -132,16 +131,16 @@ function Encode-Video {
 
         $TargetDir = ""
         $ReEncodeDir = "encode-output"
-        $videos = @()
+        $Videos = @()
         # Check if target is a file (leaf) or dir (container)
         if (Test-Path $Target -PathType Leaf) {
-            $videos += Get-Item $Target
+            $Videos += Get-Item $Target
             $TargetDir = $Target.Directory.FullName
         } else {
-            # Remember to add another repalce in $new_file_path if adding more file extensions
-            $videos += Get-ChildItem $Target -Attributes !Directory -Recurse:$recurse -Filter "*.mp4"
-            $videos += Get-ChildItem $Target -Attributes !Directory -Recurse:$recurse -Filter "*.wmv"
-            $videos = $videos | Sort-Object Length -Descending
+            # Remember to add another repalce in $NewFilePath if adding more file extensions
+            $Videos += Get-ChildItem $Target -Attributes !Directory -Recurse:$Recurse -Filter "*.mp4"
+            $Videos += Get-ChildItem $Target -Attributes !Directory -Recurse:$Recurse -Filter "*.wmv"
+            $Videos = $Videos | Sort-Object Length -Descending
             $TargetDir = $Target.FullName
         }
 
@@ -156,46 +155,46 @@ function Encode-Video {
         Log-Message $LogFile "Started job."
 
         $i = 0
-        foreach($video in $videos) {
-            $new_file_path = [IO.Path]::Combine($TargetDir, $ReEncodeDir, ($video.Name -replace ".mp4", ".mkv" -replace ".wmv", ".mkv"))
+        foreach($Video in $Videos) {
+            $NewFilePath = [IO.Path]::Combine($TargetDir, $ReEncodeDir, ($Video.Name -replace ".mp4", ".mkv" -replace ".wmv", ".mkv"))
             # Path with Powershell special chars escaped so Test-Path and Get-Item for example work.
             # The unescaped path somehow works just fine for FFMPEG though ¯\_(ツ)_/¯
-            $new_file_path_escaped = [WildcardPattern]::Escape($new_file_path)
+            $NewFilePathEscaped = [WildcardPattern]::Escape($NewFilePath)
 
             # Doesn't work. ffmpeg breaks it maybe
-            Write-Progress -Activity "Encoding" -Status "$i/$($videos.Length) complete" -PercentComplete ($i / $videos.Count * 100) -CurrentOperation $video.Name;
+            Write-Progress -Activity "Encoding" -Status "$i/$($Videos.Length) complete" -PercentComplete ($i / $Videos.Count * 100) -CurrentOperation $Video.Name;
             $i = $i + 1
 
-            if (Test-Path $new_file_path_escaped) {
-                Log-Message $LogFile "$video already exists. Skipping... "
+            if (Test-Path $NewFilePathEscaped) {
+                Log-Message $LogFile "$Video already exists. Skipping... "
                 continue
             }
 
-            $size_in_gb = $video.Length / 1GB
-            if ($size_in_gb -gt $MinSize) {
-                Log-Message $LogFile "Re-encoding $video... " -NoNewLine
+            $SizeInGB = $Video.Length / 1GB
+            if ($SizeInGB -gt $MinSize) {
+                Log-Message $LogFile "Re-encoding $Video... " -NoNewLine
 
                 # ffmpeg -report "Dump full command line and log output to a file named program-YYYYMMDD-HHMMSS.log in the current directory"
                 # For debugging the input args
                 if ($Scale) {
-                    ffmpeg -n -i "$video" -vf "scale=-1:'min($Scale,ih)'" "-c:v" $lib -preset $Preset -crf $CRF "-c:a" aac "-b:a" 96k "$new_file_path"
+                    ffmpeg -n -i "$Video" -vf "scale=-1:'min($Scale,ih)'" "-c:v" $lib -preset $Preset -crf $CRF "-c:a" aac "-b:a" 96k "$NewFilePath"
                 } else {
-                    ffmpeg -n -i "$video" "-c:v" $lib -preset $Preset -crf $CRF "-c:a" aac "-b:a" 96k "$new_file_path"
+                    ffmpeg -n -i "$Video" "-c:v" $lib -preset $Preset -crf $CRF "-c:a" aac "-b:a" 96k "$NewFilePath"
                 }
 
                 Start-Sleep -s 1
 
-                $new_video = Get-Item $new_file_path_escaped
+                $NewVideo = Get-Item $NewFilePathEscaped
 
                 # Copy attributes over
-                $new_video.CreationTime = $video.CreationTime
-                $new_video.LastWriteTime = $video.LastWriteTime
-                # $new_video.LastAccessTime = $video.LastAccessTime
-                # $new_video.Attributes = $video.Attributes
+                $NewVideo.CreationTime = $Video.CreationTime
+                $NewVideo.LastWriteTime = $Video.LastWriteTime
+                # $NewVideo.LastAccessTime = $Video.LastAccessTime
+                # $NewVideo.Attributes = $Video.Attributes
 
-                Log-Message $LogFile "Done. $(Format-FileSize($video.Length)) -> $(Format-FileSize($new_video.Length))." -NoTimestamp
+                Log-Message $LogFile "Done. $(Format-FileSize($Video.Length)) -> $(Format-FileSize($NewVideo.Length))." -NoTimestamp
             } else {
-                Log-Message $LogFile "$video smaller than $(Format-FileSize($MinSize * 1GB)). Skipping..."
+                Log-Message $LogFile "$Video smaller than $(Format-FileSize($MinSize * 1GB)). Skipping..."
             }
             # break
         }
