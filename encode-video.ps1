@@ -26,6 +26,7 @@ function Encode-Video {
     Param (
         # What to process. File/dir
         [Parameter(Position=0)]
+        [ValidateScript({ Test-Path $_ }, ErrorMessage = "File/folder '{0}' doesn't exist.")]
         [string]$Target = ".",
         # The CRF quality value. Lower is better. 23 is the x264 default. 28 for x265
         [int64]$CRF,
@@ -127,11 +128,6 @@ function Encode-Video {
     }
 
     Process {
-        if (-Not (Test-Path $Target)) {
-            Write-Output "Input doesn't exist: $Target"
-            exit
-        }
-
         [object]$Target = Get-Item $Target
 
         $TargetDir = ""
