@@ -1,4 +1,4 @@
-function Encode-Video {
+function Compress-Video {
     <#
     .SYNOPSIS
         Encode video(s) in $Target with FFMPEG to $Scale at CRF of $CRF with 96k AAC audio using either -h264 or -h265 (default)
@@ -202,3 +202,5 @@ function Encode-Video {
         Log-Message $LogFile "Done."
     }
 }
+
+Export-ModuleMember -Function Compress-Video

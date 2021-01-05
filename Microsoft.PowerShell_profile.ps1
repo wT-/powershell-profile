@@ -5,7 +5,8 @@
 . $PSScriptRoot\psreadline.ps1
 
 # Encode-Video cmdlet to... encode videos!
-. $PSScriptRoot\encode-video.ps1
+# . $PSScriptRoot\encode-video.ps1
+Import-Module Compress-Video -Verbose
 
 # Cmdlet to copy file created/modified dates over from $source to $target
 . $PSScriptRoot\copy-times.ps1
