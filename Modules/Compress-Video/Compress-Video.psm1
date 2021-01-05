@@ -1,3 +1,63 @@
+function Log-Message {
+    Param
+    (
+        [Parameter(Mandatory)]
+        [string]$File,
+
+        [Parameter(Mandatory)]
+        [string]$Message,
+
+        [Parameter()]
+        [switch]$NoNewLine,
+
+        [Parameter()]
+        [switch]$NoTimestamp
+    )
+
+    if ($NoNewLine) {
+        if ($NoTimestamp) {
+            Add-Content $File $Message -NoNewLine
+            Write-Host $Message -NoNewLine
+        } else {
+            $msg = "{0} - {1}" -f (Get-Date -Format u), $Message
+            Add-Content $File $msg -NoNewLine
+            Write-Host $msg -NoNewLine
+        }
+    } else {
+        if ($NoTimestamp) {
+            Add-Content $File $Message
+            Write-Host $Message
+        } else {
+            $msg = "{0} - {1}" -f (Get-Date -Format u), $Message
+            Add-Content $File $msg
+            Write-Host $msg
+        }
+    }
+}
+
+Function Format-FileSize {
+    Param (
+        [Parameter(Mandatory)]
+        [int64]$size
+    )
+    If ($size -gt 1TB) {
+        [string]::Format("{0:0.00} TB", $size / 1TB)
+    }
+    ElseIf ($size -gt 1GB) {
+        [string]::Format("{0:0.00} GB", $size / 1GB)
+    }
+    ElseIf ($size -gt 1MB) {
+        [string]::Format("{0:0.00} MB", $size / 1MB)
+    }
+    ElseIf ($size -gt 1KB) {
+        [string]::Format("{0:0.00} kB", $size / 1KB)
+    }
+    ElseIf ($size -gt 0) {
+        [string]::Format("{0:0.00} B", $size)
+    }
+    Else {""}
+}
+
 function Compress-Video {
     <#
     .SYNOPSIS
@@ -45,67 +105,6 @@ function Compress-Video {
         [string]$Preset = "slow"
     )
     Begin {
-        # Internal helper functions
-        function Log-Message {
-            Param
-            (
-                [Parameter(Mandatory)]
-                [string]$File,
-
-                [Parameter(Mandatory)]
-                [string]$Message,
-
-                [Parameter()]
-                [switch]$NoNewLine,
-
-                [Parameter()]
-                [switch]$NoTimestamp
-            )
-
-            if ($NoNewLine) {
-                if ($NoTimestamp) {
-                    Add-Content $File $Message -NoNewLine
-                    Write-Host $Message -NoNewLine
-                } else {
-                    $msg = "{0} - {1}" -f (Get-Date -Format u), $Message
-                    Add-Content $File $msg -NoNewLine
-                    Write-Host $msg -NoNewLine
-                }
-            } else {
-                if ($NoTimestamp) {
-                    Add-Content $File $Message
-                    Write-Host $Message
-                } else {
-                    $msg = "{0} - {1}" -f (Get-Date -Format u), $Message
-                    Add-Content $File $msg
-                    Write-Host $msg
-                }
-            }
-        }
-
-        Function Format-FileSize {
-            Param (
-                [Parameter(Mandatory)]
-                [int64]$size
-            )
-            If ($size -gt 1TB) {
-                [string]::Format("{0:0.00} TB", $size / 1TB)
-            }
-            ElseIf ($size -gt 1GB) {
-                [string]::Format("{0:0.00} GB", $size / 1GB)
-            }
-            ElseIf ($size -gt 1MB) {
-                [string]::Format("{0:0.00} MB", $size / 1MB)
-            }
-            ElseIf ($size -gt 1KB) {
-                [string]::Format("{0:0.00} kB", $size / 1KB)
-            }
-            ElseIf ($size -gt 0) {
-                [string]::Format("{0:0.00} B", $size)
-            }
-            Else {""}
-        }
-
         # Set the correct library and default CRF per library
         if ($h264) {
             $lib = "libx264"
