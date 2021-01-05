@@ -20,11 +20,11 @@
 function Log-Message {
     Param
     (
-        [Parameter(Mandatory)]
-        [string]$File,
-
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory, Position=0)]
         [string]$Message,
+
+        [Parameter()]
+        [string]$ToFile = "$Env:Home\Compress-Video.log",
 
         [Parameter()]
         [switch]$NoNewLine,
@@ -35,20 +35,20 @@ function Log-Message {
 
     if ($NoNewLine) {
         if ($NoTimestamp) {
-            Add-Content $File $Message -NoNewLine
+            Add-Content -Path $ToFile -Value $Message -NoNewLine
             Write-Host $Message -NoNewLine
         } else {
             $msg = "{0} - {1}" -f (Get-Date -Format u), $Message
-            Add-Content $File $msg -NoNewLine
+            Add-Content -Path $ToFile -Value $msg -NoNewLine
             Write-Host $msg -NoNewLine
         }
     } else {
         if ($NoTimestamp) {
-            Add-Content $File $Message
+            Add-Content -Path $ToFile -Value $Message
             Write-Host $Message
         } else {
             $msg = "{0} - {1}" -f (Get-Date -Format u), $Message
-            Add-Content $File $msg
+            Add-Content -Path $ToFile -Value $msg
             Write-Host $msg
         }
     }
@@ -125,6 +125,8 @@ function Compress-Video {
                 $CRF = 28
             }
         }
+
+         Log-Message "Started job."
     }
 
     Process {
@@ -148,13 +150,6 @@ function Compress-Video {
         # Make the "re-encodes" dir
         New-Item -Path $TargetDir -Name $ReEncodeDir -ItemType Directory -Force > $null
 
-        # Setup logging
-        $LogFile = Join-Path $TargetDir "log.txt"
-        # This overwrites the old file
-        # New-Item $LogFile -Force > $null
-        New-Item $LogFile > $null
-        Log-Message $LogFile "Started job."
-
         $i = 0
         foreach($Video in $Videos) {
             $NewFilePath = [IO.Path]::Combine($TargetDir, $ReEncodeDir, ($Video.Name -replace ".mp4", ".mkv" -replace ".wmv", ".mkv"))
@@ -167,13 +162,13 @@ function Compress-Video {
             $i = $i + 1
 
             if (Test-Path $NewFilePathEscaped) {
-                Log-Message $LogFile "$Video already exists. Skipping... "
+                Log-Message "$Video already exists. Skipping... "
                 continue
             }
 
             $SizeInGB = $Video.Length / 1GB
             if ($SizeInGB -gt $MinSize) {
-                Log-Message $LogFile "Re-encoding $Video... " -NoNewLine
+                Log-Message "Re-encoding $Video... " -NoNewLine
 
                 # ffmpeg -report "Dump full command line and log output to a file named program-YYYYMMDD-HHMMSS.log in the current directory"
                 # For debugging the input args
@@ -193,14 +188,14 @@ function Compress-Video {
                 # $NewVideo.LastAccessTime = $Video.LastAccessTime
                 # $NewVideo.Attributes = $Video.Attributes
 
-                Log-Message $LogFile "Done. $(Format-FileSize($Video.Length)) -> $(Format-FileSize($NewVideo.Length))." -NoTimestamp
+                Log-Message "Done. $(Format-FileSize($Video.Length)) -> $(Format-FileSize($NewVideo.Length))." -NoTimestamp
             } else {
-                Log-Message $LogFile "$Video smaller than $(Format-FileSize($MinSize * 1GB)). Skipping..."
+                Log-Message "$Video smaller than $(Format-FileSize($MinSize * 1GB)). Skipping..."
             }
             # break
         }
 
-        Log-Message $LogFile "Done."
+        Log-Message "Done."
     }
 }
 
