@@ -89,6 +89,8 @@ function Compress-Video {
         [Parameter(Position=0)]
         [ValidateScript({ Test-Path $_ }, ErrorMessage = "File/folder '{0}' doesn't exist.")]
         [string]$Target = ".",
+        # Where to dump the processed files. Will be a subdir next to the processed file
+        [string]$OutputDirName = "encode-output",
         # The CRF quality value. Lower is better. 23 is the x264 default. 28 for x265
         [int64]$CRF,
         # Don't process files below this in gigabytes
@@ -132,27 +134,24 @@ function Compress-Video {
     Process {
         [object]$Target = Get-Item $Target
 
-        $TargetDir = ""
-        $ReEncodeDir = "encode-output"
         $Videos = @()
         # Check if target is a file (leaf) or dir (container)
         if (Test-Path $Target -PathType Leaf) {
             $Videos += Get-Item $Target
-            $TargetDir = $Target.Directory.FullName
         } else {
             # Remember to add another repalce in $NewFilePath if adding more file extensions
             $Videos += Get-ChildItem $Target -Attributes !Directory -Recurse:$Recurse -Filter "*.mp4"
             $Videos += Get-ChildItem $Target -Attributes !Directory -Recurse:$Recurse -Filter "*.wmv"
             $Videos = $Videos | Sort-Object Length -Descending
-            $TargetDir = $Target.FullName
         }
-
-        # Make the "re-encodes" dir
-        New-Item -Path $TargetDir -Name $ReEncodeDir -ItemType Directory -Force > $null
 
         $i = 0
         foreach($Video in $Videos) {
-            $NewFilePath = [IO.Path]::Combine($TargetDir, $ReEncodeDir, ($Video.Name -replace ".mp4", ".mkv" -replace ".wmv", ".mkv"))
+            $OutputDir = [IO.Path]::Combine($Video.DirectoryName, $OutputDirName)
+            # Try creating the output directory and ignore errors
+            New-Item -ItemType "Directory" -Path $OutputDir -Force > $null
+
+            $NewFilePath = [IO.Path]::Combine($OutputDir, ($Video.Name -replace ".mp4", ".mkv" -replace ".wmv", ".mkv"))
             # Path with Powershell special chars escaped so Test-Path and Get-Item for example work.
             # The unescaped path somehow works just fine for FFMPEG though ¯\_(ツ)_/¯
             $NewFilePathEscaped = [WildcardPattern]::Escape($NewFilePath)
@@ -162,7 +161,7 @@ function Compress-Video {
             $i = $i + 1
 
             if (Test-Path $NewFilePathEscaped) {
-                Log-Message "$Video already exists. Skipping... "
+                Log-Message "$NewFilePath already exists. Skipping... "
                 continue
             }
 
