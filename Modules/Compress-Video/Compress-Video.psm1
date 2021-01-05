@@ -57,22 +57,22 @@ function Log-Message {
 Function Format-FileSize {
     Param (
         [Parameter(Mandatory)]
-        [int64]$size
+        [int64]$Size
     )
-    If ($size -gt 1TB) {
-        [string]::Format("{0:0.00} TB", $size / 1TB)
+    If ($Size -gt 1TB) {
+        [string]::Format("{0:0.00} TB", $Size / 1TB)
     }
-    ElseIf ($size -gt 1GB) {
-        [string]::Format("{0:0.00} GB", $size / 1GB)
+    ElseIf ($Size -gt 1GB) {
+        [string]::Format("{0:0.00} GB", $Size / 1GB)
     }
-    ElseIf ($size -gt 1MB) {
-        [string]::Format("{0:0.00} MB", $size / 1MB)
+    ElseIf ($Size -gt 1MB) {
+        [string]::Format("{0:0.00} MB", $Size / 1MB)
     }
-    ElseIf ($size -gt 1KB) {
-        [string]::Format("{0:0.00} kB", $size / 1KB)
+    ElseIf ($Size -gt 1KB) {
+        [string]::Format("{0:0.00} kB", $Size / 1KB)
     }
-    ElseIf ($size -gt 0) {
-        [string]::Format("{0:0.00} B", $size)
+    ElseIf ($Size -gt 0) {
+        [string]::Format("{0:0.00} B", $Size)
     }
     Else {""}
 }
