@@ -22,9 +22,10 @@ function Encode-Video {
     # FIXME: Recurse doesn't work. The output dir is determined at the start instead of in each directory
     #     Maybe that doesn't make sense either... in any case, it doesn't work right now.
 
-    [CmdletBinding(DefaultParameterSetName="h264")]
+    [CmdletBinding(DefaultParameterSetName="h265")]
     Param (
         # What to process. File/dir
+        [Parameter(Position=0)]
         [string]$Target = ".",
         # The CRF quality value. Lower is better. 23 is the x264 default. 28 for x265
         [int64]$CRF,
