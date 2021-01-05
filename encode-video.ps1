@@ -30,7 +30,7 @@ function Encode-Video {
         # The CRF quality value. Lower is better. 23 is the x264 default. 28 for x265
         [int64]$CRF,
         # Don't process files below this in gigabytes
-        [double]$MinSize = 1.0,
+        [double]$MinSize = 0.0,
         # Downscale video to maximum of this many vertical pixels, for example "1080"
         [int64]$Scale,
         # Recurse in to subdirs. Probably unwanted most of the time
