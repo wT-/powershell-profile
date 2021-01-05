@@ -26,14 +26,18 @@ function Copy-Times {
     $To = Get-Item $Target
     if (!($Silent)) {
         Write-Host "($Target).CreationTime:"
-        Write-Host "$($From.CreationTime) ->"
-        Write-Host "$($To.CreationTime)"
+        Write-Host "Old:" -NoNewline -ForegroundColor Black -BackgroundColor DarkRed
+        Write-Host " $($To.CreationTime)"
+        Write-Host "New:" -NoNewline -ForegroundColor Black -BackgroundColor DarkGreen
+        Write-Host " $($From.CreationTime)"
     }
     $To.CreationTime = $From.CreationTime
     if (!($Silent)) {
         Write-Host "($Target).LastWriteTime:"
-        Write-Host "$($From.LastWriteTime) ->"
-        Write-Host "$($To.LastWriteTime)"
+        Write-Host "Old:" -NoNewline -ForegroundColor Black -BackgroundColor DarkRed
+        Write-Host " $($To.LastWriteTime)"
+        Write-Host "New:" -NoNewline -ForegroundColor Black -BackgroundColor DarkGreen
+        Write-Host " $($From.LastWriteTime)"
     }
     $To.LastWriteTime = $From.LastWriteTime
 }
