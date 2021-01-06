@@ -5,6 +5,7 @@
 #     Needs to be mutually exclusive
 #     Having ParameterSets for h264 and h265 complicates things. Can a parameter be in two sets at the same time?
 #     Need to have mutually exclusive sets for both profiles and h264/h265
+# TODO: Handle ctrl+c during encoding messing up the log a bit by leaving no newline in it
 
 function Log-Message {
     Param
@@ -69,14 +70,14 @@ Function Format-FileSize {
 function Compress-Video {
     <#
     .SYNOPSIS
-        Encode video(s) in $Target with FFMPEG to $Scale at CRF of $CRF with 96k AAC audio using either -h264 or -h265 (default)
+        Encode video(s in) $Target with FFMPEG to $Scale at CRF of $CRF with 96k AAC audio using either -x264 or -x265 (default) at $Preset encoding preset
     #>
 
     [CmdletBinding(DefaultParameterSetName="h265")]
     Param (
-        # What to process. File/dir
+        # What to process. Video file or directory with video files
         [Parameter(Position=0, ValueFromPipeline)]
-        [ValidateScript({ Test-Path [WildcardPattern]::Escape($_.Trim(" \t`"")) }, ErrorMessage = "File/folder '{0}' doesn't exist.")]
+        [ValidateScript({ Test-Path ([WildcardPattern]::Escape($_.Trim(" \t`""))) }, ErrorMessage = "File/folder '{0}' doesn't exist.")]
         [string]$Target = ".",
         # Where to dump the processed files. Will be a subdir next to the processed file
         [string]$OutputDirName = "encode-output",
@@ -86,13 +87,13 @@ function Compress-Video {
         [double]$MinSize = 0.0,
         # Downscale video to maximum of this many vertical pixels, for example "1080"
         [int64]$Scale,
-        # Recurse in to subdirs. Probably unwanted most of the time
+        # Whether to recurse in to subdirs
         [switch]$Recurse = $false,
-        # Mutually exclusive swithes to determine target encoding library
-        [Parameter(ParameterSetName="h264")]
-        [switch]$h264,
-        [Parameter(ParameterSetName="h265")]
-        [switch]$h265,
+        # Mutually exclusive switches to pick the encoder
+        [Parameter(ParameterSetName="x264")]
+        [switch]$x264,
+        [Parameter(ParameterSetName="x265")]
+        [switch]$x265,
         # Preset to use
         [ValidateSet("ultrafast", "superfast", "veryfast", "faster", "fast", "medium", "slow", "slower", "veryslow", "placebo")]
         [string]$Preset = "slow"
@@ -128,6 +129,8 @@ function Compress-Video {
         # Build the list of videos to process.
 
         $Target = $Target.Trim(" \t`"")
+
+        # TODO: Should we do the [WildcardPattern]::Escape here too? I can't remember what the problematic characters were so I can't test right now...
 
         $AllFiles = Get-ChildItem $Target -Attributes !Directory -Recurse:$Recurse
         # Filter by extension, and make sure to not process any files inside $OutputDirName
