@@ -151,7 +151,7 @@ function Compress-Video {
             # Try creating the output directory and ignore errors
             New-Item -ItemType "Directory" -Path $OutputDir -Force > $null
 
-            $NewFilePath = [IO.Path]::Combine($OutputDir, ($Video.Name -replace ".mp4", ".mkv" -replace ".wmv", ".mkv"))
+            $NewFilePath = [IO.Path]::Combine($OutputDir, "$($Video.BaseName).mkv")
             # Path with Powershell special chars escaped so Test-Path and Get-Item for example work.
             # The unescaped path somehow works just fine for FFMPEG though ¯\_(ツ)_/¯
             $NewFilePathEscaped = [WildcardPattern]::Escape($NewFilePath)
