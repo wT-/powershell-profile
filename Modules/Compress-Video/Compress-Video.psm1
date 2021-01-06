@@ -1,10 +1,3 @@
-# TODO: Let me input a file that has paths to everything I wanna re-encode:
-#     Check https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-content?view=powershell-7
-#      -> Reads file contents and spits it out line-by-line
-#     Maybe use "Begin{}"/"Process{}"/"End{}" blocks.
-#      -> Figure out files to process in Begin
-#       Either from file or from Get-ChildItem
-#      -> Process the list of files Process
 # TODO: Support symlinks:
 #     At least file-size checking is broken as symlinks show up as 0 bytes
 #     What else?
@@ -12,10 +5,6 @@
 #     Needs to be mutually exclusive
 #     Having ParameterSets for h264 and h265 complicates things. Can a parameter be in two sets at the same time?
 #     Need to have mutually exclusive sets for both profiles and h264/h265
-# FIXME: Recurse doesn't work. The output dir is determined at the start instead of in each directory
-#     Maybe that doesn't make sense either... in any case, it doesn't work right now.
-# TODO: Add support for pipelining
-
 
 function Log-Message {
     Param
@@ -86,8 +75,8 @@ function Compress-Video {
     [CmdletBinding(DefaultParameterSetName="h265")]
     Param (
         # What to process. File/dir
-        [Parameter(Position=0)]
-        [ValidateScript({ Test-Path $_ }, ErrorMessage = "File/folder '{0}' doesn't exist.")]
+        [Parameter(Position=0, ValueFromPipeline)]
+        [ValidateScript({ Test-Path [WildcardPattern]::Escape($_.Trim(" \t`"")) }, ErrorMessage = "File/folder '{0}' doesn't exist.")]
         [string]$Target = ".",
         # Where to dump the processed files. Will be a subdir next to the processed file
         [string]$OutputDirName = "encode-output",
@@ -128,22 +117,27 @@ function Compress-Video {
             }
         }
 
+         $ValidExtensions = @(".mp4", ".avi", ".wmv", ".flv")
+
+         $Videos = @()
+
          Log-Message "Started job."
     }
 
     Process {
-        [object]$Target = Get-Item $Target
+        # Build the list of videos to process.
 
-        $Videos = @()
-        # Check if target is a file (leaf) or dir (container)
-        if (Test-Path $Target -PathType Leaf) {
-            $Videos += Get-Item $Target
-        } else {
-            # Remember to add another repalce in $NewFilePath if adding more file extensions
-            $Videos += Get-ChildItem $Target -Attributes !Directory -Recurse:$Recurse -Filter "*.mp4"
-            $Videos += Get-ChildItem $Target -Attributes !Directory -Recurse:$Recurse -Filter "*.wmv"
-            $Videos = $Videos | Sort-Object Length -Descending
-        }
+        $Target = $Target.Trim(" \t`"")
+
+        $AllFiles = Get-ChildItem $Target -Attributes !Directory -Recurse:$Recurse
+        # Filter by extension, and make sure to not process any files inside $OutputDirName
+        $Videos += $AllFiles.Where{ $ValidExtensions.Contains($_.Extension) }.Where{ -Not $_.FullName.Contains($OutputDirName) }
+    }
+
+    End {
+        # Actually process the videos
+
+        $Videos = $Videos | Sort-Object Length -Descending
 
         foreach($Video in $Videos) {
             $OutputDir = [IO.Path]::Combine($Video.DirectoryName, $OutputDirName)
@@ -186,11 +180,8 @@ function Compress-Video {
             } else {
                 Log-Message "$Video smaller than $(Format-FileSize($MinSize * 1GB)). Skipping..."
             }
-            # break
         }
-    }
 
-    End {
         Log-Message "Done."
     }
 }
