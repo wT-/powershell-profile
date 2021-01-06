@@ -145,7 +145,6 @@ function Compress-Video {
             $Videos = $Videos | Sort-Object Length -Descending
         }
 
-        $i = 0
         foreach($Video in $Videos) {
             $OutputDir = [IO.Path]::Combine($Video.DirectoryName, $OutputDirName)
             # Try creating the output directory and ignore errors
@@ -155,10 +154,6 @@ function Compress-Video {
             # Path with Powershell special chars escaped so Test-Path and Get-Item for example work.
             # The unescaped path somehow works just fine for FFMPEG though ¯\_(ツ)_/¯
             $NewFilePathEscaped = [WildcardPattern]::Escape($NewFilePath)
-
-            # Doesn't work. ffmpeg breaks it maybe
-            Write-Progress -Activity "Encoding" -Status "$i/$($Videos.Length) complete" -PercentComplete ($i / $Videos.Count * 100) -CurrentOperation $Video.Name;
-            $i = $i + 1
 
             if (Test-Path $NewFilePathEscaped) {
                 Log-Message "$NewFilePath already exists. Skipping... "
