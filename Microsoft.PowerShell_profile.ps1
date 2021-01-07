@@ -4,6 +4,9 @@
 # PSReadLine stuff
 . $PSScriptRoot\psreadline.ps1
 
+# Cmdlet to preview the available shell colors
+. $PSScriptRoot\print-shell-colors.ps1
+
 # Encode-Video cmdlet to... encode videos!
 # . $PSScriptRoot\encode-video.ps1
 Import-Module Compress-Video
