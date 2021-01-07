@@ -2,7 +2,11 @@
 # https://github.com/PowerShell/PSReadLine/blob/master/PSReadLine/SamplePSReadLineProfile.ps1
 
 Import-Module PSReadLine
-Set-PSReadlineKeyHandler -Key Tab -Function Complete
+
+# Bash-like tab complete:
+# Set-PSReadlineKeyHandler -Key Tab -Function Complete
+# Original behavior:
+Set-PSReadlineKeyHandler -Key Tab -Function TabCompleteNext
 
 Set-PSReadLineOption -HistorySearchCursorMovesToEnd
 Set-PSReadLineKeyHandler -Key UpArrow -Function HistorySearchBackward
