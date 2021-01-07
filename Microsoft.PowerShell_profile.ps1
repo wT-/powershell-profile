@@ -20,3 +20,8 @@ rustup completions powershell | Out-String | Invoke-Expression
 
 $ENV:STARSHIP_CONFIG = "$HOME\starship.toml"
 Invoke-Expression (&starship init powershell)
+
+# Pshazz has mostly prompt stuff but also few other things.
+# Configured by the Pshazz theme files.
+# See https://github.com/lukesampson/pshazz
+try { $null = gcm pshazz -ea stop; pshazz init 'default' } catch { }
