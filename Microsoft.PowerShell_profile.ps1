@@ -15,10 +15,8 @@ Import-Module Compress-Video
 . $PSScriptRoot\copy-times.ps1
 
 # Rustup completions
-# Update by running:
-#   rm ${env:USERPROFILE}\Documents\WindowsPowerShell\rustup_completions.ps1
-#   rustup completions powershell >> ${env:USERPROFILE}\Documents\WindowsPowerShell\rustup_completions.ps1
-. $PSScriptRoot\rustup_completions.ps1
+# TODO: Check that Rustup is installed
+rustup completions powershell | Out-String | Invoke-Expression
 
 $ENV:STARSHIP_CONFIG = "$HOME\starship.toml"
 Invoke-Expression (&starship init powershell)
