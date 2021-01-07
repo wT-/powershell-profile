@@ -18,6 +18,10 @@ Import-Module Compress-Video
 # TODO: Check that Rustup is installed
 rustup completions powershell | Out-String | Invoke-Expression
 
+# This is for messing with the console color scheme
+# https://github.com/mmims/PSConsoleTheme
+# Seems obsolete if using the new Windows Terminal, but also hopelessly broken in the old conhost.
+# Import-Module PSConsoleTheme
 
 # Starship is the fancy prompt made in Rust
 $ENV:STARSHIP_CONFIG = "$HOME\starship.toml"
