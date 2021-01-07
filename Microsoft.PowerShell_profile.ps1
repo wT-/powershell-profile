@@ -24,7 +24,6 @@ rustup completions powershell | Out-String | Invoke-Expression
 # Import-Module PSConsoleTheme
 
 # Starship is the fancy prompt made in Rust
-$ENV:STARSHIP_CONFIG = "$HOME\starship.toml"
 Invoke-Expression (&starship init powershell)
 starship completions | Out-String | Invoke-Expression
 
