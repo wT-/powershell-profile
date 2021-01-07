@@ -18,8 +18,20 @@ Import-Module Compress-Video
 # TODO: Check that Rustup is installed
 rustup completions powershell | Out-String | Invoke-Expression
 
+
+# Starship is the fancy prompt made in Rust
 $ENV:STARSHIP_CONFIG = "$HOME\starship.toml"
 Invoke-Expression (&starship init powershell)
+starship completions | Out-String | Invoke-Expression
+
+# This sets the Window title to the current location when the Starship prompt is called
+# TODO: Check that Starship is installed
+$promptScript = (Get-Item function:prompt).ScriptBlock
+function Prompt {
+    $path = Get-Location
+    $host.ui.RawUI.WindowTitle = $path
+    & $promptScript
+}
 
 # Pshazz has mostly prompt stuff but also few other things.
 # Configured by the Pshazz theme files.
