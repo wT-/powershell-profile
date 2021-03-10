@@ -6,6 +6,13 @@
 #     Having ParameterSets for h264 and h265 complicates things. Can a parameter be in two sets at the same time?
 #     Need to have mutually exclusive sets for both profiles and h264/h265
 # TODO: Handle ctrl+c during encoding messing up the log a bit by leaving no newline in it
+#     Wrap everything in a try/finally block:
+#      - Finally block gets called always, even if ctrl+c:
+#        -> Set a $Done var in try if we reached the end without issues.
+#        -> Check for $Done in finally and:
+#           - Make sure there's a newline printed so logs don't get messed up
+#           - What else?
+#      - Apparently you can't output anything in the finally block?
 
 function Log-Message {
     Param
@@ -118,19 +125,22 @@ function Compress-Video {
             }
         }
 
-         $ValidExtensions = @(".mp4", ".avi", ".wmv", ".flv")
+        $ValidExtensions = @(".mp4", ".avi", ".wmv", ".flv")
 
-         $Videos = @()
+        $Videos = @()
 
-         Log-Message "Started job."
+        if ($Scale) {
+            Log-Message "Started job using $lib @ CRF $CRF (Re-scaling to ${Scale}p)."
+        } else {
+            Log-Message "Started job using $lib @ CRF $CRF."
+        }
     }
 
     Process {
         # Build the list of videos to process.
 
-        $Target = $Target.Trim(" \t`"")
-
-        # TODO: Should we do the [WildcardPattern]::Escape here too? I can't remember what the problematic characters were so I can't test right now...
+        # Example problematic path that requires escaping: "F:\Dir1\File1 [TextInsideBrackets] MoreText.ext"
+        $Target = [WildcardPattern]::Escape($Target.Trim(" \t`""))
 
         $AllFiles = Get-ChildItem $Target -Attributes !Directory -Recurse:$Recurse
         # Filter by extension, and make sure to not process any files inside $OutputDirName
