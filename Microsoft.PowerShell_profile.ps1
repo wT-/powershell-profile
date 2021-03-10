@@ -11,8 +11,8 @@
 # . $PSScriptRoot\encode-video.ps1
 Import-Module Compress-Video
 
-# Cmdlet to copy file created/modified dates over from $source to $target
-. $PSScriptRoot\copy-times.ps1
+# Random cmdlets I've made
+Import-Module MyRandomModules
 
 # Rustup completions
 # TODO: Check that Rustup is installed
