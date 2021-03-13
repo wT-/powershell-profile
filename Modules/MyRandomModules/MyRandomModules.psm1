@@ -8,10 +8,10 @@ function Copy-Times {
     Param (
         # What to process. File/dir
         [Parameter(Position=0, Mandatory=$true)]
-        [ValidateScript({ Test-Path ([WildcardPattern]::Escape($_.Trim(" \t`""))) }, ErrorMessage = "File/folder '{0}' doesn't exist.")]
+        [ValidateScript({ Test-Path ([WildcardPattern]::Escape($_.Trim(" `t`""))) }, ErrorMessage = "File/folder '{0}' doesn't exist.")]
         [string]$Source,
         [Parameter(Position=1, Mandatory=$true)]
-        [ValidateScript({ Test-Path ([WildcardPattern]::Escape($_.Trim(" \t`""))) }, ErrorMessage = "File/folder '{0}' doesn't exist.")]
+        [ValidateScript({ Test-Path ([WildcardPattern]::Escape($_.Trim(" `t`""))) }, ErrorMessage = "File/folder '{0}' doesn't exist.")]
         [string]$Target,
         [Parameter(Mandatory=$false)]
         [switch]$Silent = $false
@@ -50,7 +50,7 @@ function Move-ItemWithCreationTime {
     Param (
         # What to process. File/dir
         [Parameter(Position=0, Mandatory=$true)]
-        [ValidateScript({ Test-Path ([WildcardPattern]::Escape($_.Trim(" \t`""))) }, ErrorMessage = "File/folder '{0}' doesn't exist.")]
+        [ValidateScript({ Test-Path ([WildcardPattern]::Escape($_.Trim(" `t`""))) }, ErrorMessage = "File/folder '{0}' doesn't exist.")]
         [string]$Path,
         [Parameter(Position=1, Mandatory=$true)]
         [string]$Destination
