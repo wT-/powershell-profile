@@ -84,7 +84,7 @@ function Compress-Video {
     Param (
         # What to process. Video file or directory with video files
         [Parameter(Position=0, ValueFromPipeline)]
-        [ValidateScript({ Test-Path ([WildcardPattern]::Escape($_.Trim(" \t`""))) }, ErrorMessage = "File/folder '{0}' doesn't exist.")]
+        [ValidateScript({ Test-Path ([WildcardPattern]::Escape($_.Trim(" `t`""))) }, ErrorMessage = "File/folder '{0}' doesn't exist.")]
         [string]$Target = ".",
         # Where to dump the processed files. Will be a subdir next to the processed file
         [string]$OutputDirName = "encode-output",
@@ -140,7 +140,7 @@ function Compress-Video {
         # Build the list of videos to process.
 
         # Example problematic path that requires escaping: "F:\Dir1\File1 [TextInsideBrackets] MoreText.ext"
-        $Target = [WildcardPattern]::Escape($Target.Trim(" \t`""))
+        $Target = [WildcardPattern]::Escape($Target.Trim(" `t`""))
 
         $AllFiles = Get-ChildItem $Target -Attributes !Directory -Recurse:$Recurse
         # Filter by extension, and make sure to not process any files inside $OutputDirName
