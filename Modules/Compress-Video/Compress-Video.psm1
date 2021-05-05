@@ -175,7 +175,7 @@ function Compress-Video {
                 # ffmpeg -report "Dump full command line and log output to a file named program-YYYYMMDD-HHMMSS.log in the current directory"
                 # For debugging the input args
                 if ($Scale) {
-                    ffmpeg -n -i "${Video}" -vf "scale=-1:'min(${Scale},ih)'" "-c:v" $lib -preset $Preset -crf $CRF "-c:a" aac "-b:a" 96k "${NewFilePath}"
+                    ffmpeg -n -i "${Video}" -vf "scale=-1:'min(${Scale},ih)':flags=lanczos" "-c:v" $lib -preset $Preset -crf $CRF "-c:a" aac "-b:a" 96k "${NewFilePath}"
                 } else {
                     ffmpeg -n -i "${Video}" "-c:v" $lib -preset $Preset -crf $CRF "-c:a" aac "-b:a" 96k "${NewFilePath}"
                 }
