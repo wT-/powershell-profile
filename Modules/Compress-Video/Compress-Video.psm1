@@ -130,9 +130,9 @@ function Compress-Video {
         $Videos = @()
 
         if ($Scale) {
-            Log-Message "Started job using $lib @ CRF $CRF (Re-scaling to ${Scale}p)."
+            Log-Message "Started job using ${lib} @ CRF ${CRF} (Re-scaling to ${Scale}p)."
         } else {
-            Log-Message "Started job using $lib @ CRF $CRF."
+            Log-Message "Started job using ${lib} @ CRF ${CRF}."
         }
     }
 
@@ -142,6 +142,7 @@ function Compress-Video {
         # Example problematic path that requires escaping: "F:\Dir1\File1 [TextInsideBrackets] MoreText.ext"
         $Target = [WildcardPattern]::Escape($Target.Trim(" `t`""))
 
+        # This seems to work correctly for single files too
         $AllFiles = Get-ChildItem $Target -Attributes !Directory -Recurse:$Recurse
         # Filter by extension, and make sure to not process any files inside $OutputDirName
         $Videos += $AllFiles.Where{ $ValidExtensions.Contains($_.Extension) }.Where{ -Not $_.FullName.Contains($OutputDirName) }
@@ -163,20 +164,20 @@ function Compress-Video {
             $NewFilePathEscaped = [WildcardPattern]::Escape($NewFilePath)
 
             if (Test-Path $NewFilePathEscaped) {
-                Log-Message "$NewFilePath already exists. Skipping... "
+                Log-Message "Already exists: ${NewFilePath}. Skipping... "
                 continue
             }
 
             $SizeInGB = $Video.Length / 1GB
             if ($SizeInGB -gt $MinSize) {
-                Log-Message "Re-encoding $Video... " -NoNewLine
+                Log-Message "Re-encoding ${Video}... " -NoNewLine
 
                 # ffmpeg -report "Dump full command line and log output to a file named program-YYYYMMDD-HHMMSS.log in the current directory"
                 # For debugging the input args
                 if ($Scale) {
-                    ffmpeg -n -i "$Video" -vf "scale=-1:'min($Scale,ih)'" "-c:v" $lib -preset $Preset -crf $CRF "-c:a" aac "-b:a" 96k "$NewFilePath"
+                    ffmpeg -n -i "${Video}" -vf "scale=-1:'min(${Scale},ih)'" "-c:v" $lib -preset $Preset -crf $CRF "-c:a" aac "-b:a" 96k "${NewFilePath}"
                 } else {
-                    ffmpeg -n -i "$Video" "-c:v" $lib -preset $Preset -crf $CRF "-c:a" aac "-b:a" 96k "$NewFilePath"
+                    ffmpeg -n -i "${Video}" "-c:v" $lib -preset $Preset -crf $CRF "-c:a" aac "-b:a" 96k "${NewFilePath}"
                 }
 
                 Start-Sleep -s 1
@@ -191,7 +192,7 @@ function Compress-Video {
 
                 Log-Message "Done. $(Format-FileSize($Video.Length)) -> $(Format-FileSize($NewVideo.Length))." -NoTimestamp
             } else {
-                Log-Message "$Video smaller than $(Format-FileSize($MinSize * 1GB)). Skipping..."
+                Log-Message "Skipping ${Video}: smaller than $(Format-FileSize($MinSize * 1GB))."
             }
         }
 
