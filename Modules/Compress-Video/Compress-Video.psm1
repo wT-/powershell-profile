@@ -13,6 +13,8 @@
 #           - Make sure there's a newline printed so logs don't get messed up
 #           - What else?
 #      - Apparently you can't output anything in the finally block?
+# TODO: Add ShouldProcess to the main function (allows use of -WhatIf and -Confirm)
+#     See: https://docs.microsoft.com/en-us/powershell/scripting/learn/deep-dives/everything-about-shouldprocess?view=powershell-7.1
 
 function Log-Message {
     Param
@@ -125,7 +127,7 @@ function Compress-Video {
             }
         }
 
-        $ValidExtensions = @(".mp4", ".avi", ".wmv", ".flv")
+        $ValidExtensions = @(".mp4", ".avi", ".wmv", ".flv", ".m4v", ".mov")
 
         $Videos = @()
 
@@ -175,9 +177,9 @@ function Compress-Video {
                 # ffmpeg -report "Dump full command line and log output to a file named program-YYYYMMDD-HHMMSS.log in the current directory"
                 # For debugging the input args
                 if ($Scale) {
-                    ffmpeg -n -i "${Video}" -vf "scale=-1:'min(${Scale},ih)':flags=lanczos" "-c:v" $lib -preset $Preset -crf $CRF "-c:a" aac "-b:a" 96k "${NewFilePath}"
+                    ffmpeg -v verbose -n -i "${Video}" -map "0" -vf "scale=-1:'min(${Scale},ih)':flags=lanczos" "-c:v" $lib -preset $Preset -crf $CRF "-c:a" aac "-b:a" 96k "${NewFilePath}"
                 } else {
-                    ffmpeg -n -i "${Video}" "-c:v" $lib -preset $Preset -crf $CRF "-c:a" aac "-b:a" 96k "${NewFilePath}"
+                    ffmpeg -v verbose -n -i "${Video}" -map "0" "-c:v" $lib -preset $Preset -crf $CRF "-c:a" aac "-b:a" 96k "${NewFilePath}"
                 }
 
                 Start-Sleep -s 1
