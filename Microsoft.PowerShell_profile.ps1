@@ -39,4 +39,4 @@ function Prompt {
 # Pshazz has mostly prompt stuff but also few other things.
 # Configured by the Pshazz theme files.
 # See https://github.com/lukesampson/pshazz
-try { $null = gcm pshazz -ea stop; pshazz init 'default' } catch { }
+try { $null = gcm pshazz -ea stop; pshazz init } catch { }
