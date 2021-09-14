@@ -15,6 +15,7 @@
 #      - Apparently you can't output anything in the finally block?
 # TODO: Add ShouldProcess to the main function (allows use of -WhatIf and -Confirm)
 #     See: https://docs.microsoft.com/en-us/powershell/scripting/learn/deep-dives/everything-about-shouldprocess?view=powershell-7.1
+# TODO: The ffmpeg stderr should really be redirected to somewhere and written to the log on error.
 
 function Log-Message {
     Param
@@ -162,6 +163,11 @@ function Compress-Video {
         $Videos = $Videos | Sort-Object Length -Descending
 
         foreach($Video in $Videos) {
+            if (-Not (Test-Path $Video)) {
+                # Video was renamed/removed from under us so just continue with the next one
+                continue
+            }
+
             $OutputDir = [IO.Path]::Combine($Video.DirectoryName, $OutputDirName)
             # Try creating the output directory and ignore errors
             New-Item -ItemType "Directory" -Path $OutputDir -Force > $null
@@ -186,6 +192,11 @@ function Compress-Video {
                     ffmpeg -v verbose -n -i "${Video}" -map "0" -vf "scale=-1:'min(${Scale},ih)':flags=lanczos" "-c:v" $lib -preset $Preset -crf $CRF "-c:a" aac "-b:a" 96k "${NewFilePath}"
                 } else {
                     ffmpeg -v verbose -n -i "${Video}" -map "0" "-c:v" $lib -preset $Preset -crf $CRF "-c:a" aac "-b:a" 96k "${NewFilePath}"
+
+                if (-Not $?) {
+                    Log-Message "Error!"
+                    Log-Message "Failed to encode ${Video}. Ffmpeg returned an error."
+                    continue
                 }
 
                 Start-Sleep -s 1
