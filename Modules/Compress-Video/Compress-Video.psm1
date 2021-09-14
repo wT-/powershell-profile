@@ -146,8 +146,14 @@ function Compress-Video {
 
         # This seems to work correctly for single files too
         $AllFiles = Get-ChildItem $Target -Attributes !Directory -Recurse:$Recurse
-        # Filter by extension, and make sure to not process any files inside $OutputDirName
-        $Videos += $AllFiles.Where{ $ValidExtensions.Contains($_.Extension) }.Where{ -Not $_.FullName.Contains($OutputDirName) }
+
+        if (Test-Path $Target -PathType Leaf) {
+            # No extension check if explicitly given a path to a video file
+            $Videos += $AllFiles.Where{ -Not $_.FullName.Contains($OutputDirName) }
+        } elseif (Test-Path $Target -PathType Container) {
+            # If handling a folder, assume .mkv files have already been processed and skip them
+            $Videos += $AllFiles.Where{ $ValidExtensions.Contains($_.Extension) }.Where{ -Not $_.FullName.Contains($OutputDirName) }
+        }
     }
 
     End {
