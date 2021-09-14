@@ -189,9 +189,10 @@ function Compress-Video {
                 # ffmpeg -report "Dump full command line and log output to a file named program-YYYYMMDD-HHMMSS.log in the current directory"
                 # For debugging the input args
                 if ($Scale) {
-                    ffmpeg -v verbose -n -i "${Video}" -map "0" -vf "scale=-1:'min(${Scale},ih)':flags=lanczos" "-c:v" $lib -preset $Preset -crf $CRF "-c:a" aac "-b:a" 96k "${NewFilePath}"
+                    ffmpeg -v verbose -n -i "${Video}" -map "0" -map "-0:d" -vf "scale=-1:'min(${Scale},ih)':flags=lanczos" "-c:v" $lib -preset $Preset -crf $CRF "-c:a" aac "-b:a" 96k "${NewFilePath}"
                 } else {
-                    ffmpeg -v verbose -n -i "${Video}" -map "0" "-c:v" $lib -preset $Preset -crf $CRF "-c:a" aac "-b:a" 96k "${NewFilePath}"
+                    ffmpeg -v verbose -n -i "${Video}" -map "0" -map "-0:d" "-c:v" $lib -preset $Preset -crf $CRF "-c:a" aac "-b:a" 96k "${NewFilePath}"
+                }
 
                 if (-Not $?) {
                     Log-Message "Error!"
