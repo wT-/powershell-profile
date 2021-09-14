@@ -99,6 +99,11 @@ function Move-ItemWithCreationTime {
 
 Export-ModuleMember -Function Move-ItemWithCreationTime
 
+function Move-ItemBetter {
+    <#
+    .SYNOPSIS
+        Move-Item but use Robocopy to get a progress bar and preserve .CreationTime when moving between drives.
+    #>
 
     [CmdletBinding()]
     Param (
@@ -110,17 +115,40 @@ Export-ModuleMember -Function Move-ItemWithCreationTime
         [string]$Destination
     )
 
-    $Item = Get-Item $Path
-    $OriginalCreationTime = $Item.CreationTime
+    # $Path = Resolve-Path -Path ([WildcardPattern]::Escape($Path.Trim(" `t")))
+    # $Destination = [System.IO.FileInfo]([WildcardPattern]::Escape($Destination.Trim(" `t")))
+    $Path = [System.IO.FileInfo]$Path
+    $Destination = [System.IO.FileInfo]$Destination
 
-    $MovedItem = Move-Item -Path $Path -Destination $Destination -PassThru
+    # WTF, why is this all messed up?
+    # Go to console, type
+    # $Path = [System.IO.FileInfo]"F:\asd\qwer"
+    # $Path.DirectoryName
+    # Prints F:\asd
+    # And this prints nothing:
+    Write-Host $Path.DirectoryName
+    Write-Host $Destination
+    Write-Host $Destination.DirectoryName
 
-    if (Test-Path -Path $MovedItem.FullName -PathType Leaf) {
-        $MovedItem.CreationTime = $OriginalCreationTime
-    } else {
-        Write-Host "Didn't modify CreationTime: Destination not a file."
+    if (Test-Path -Path $Destination) {
+        Write-Error "$Destination already exists." -ErrorAction Stop
+        # Maybe redundant, but I think ErrorAction could be overridden, which would be bad
+        return
     }
 
+    # /DCOPY:DAT copies everything for dirs (Data, Attributes, Timestamps. Default is DA). Sort of irrelevant here
+    # /R:0: do not retry on fail (the number of retries on failed copies default value is 1 million),
+    Robocopy $Path.DirectoryName $Destination.DirectoryName $Path.Name /DCOPY:DAT /R:0
+    if ($?) {
+        Move-Item (Join-Path $Destination.DirectoryName $Path.Name) (Join-Path $Destination.DirectoryName $Destination.Name)
+    }
+
+    # 1. Copy file from source to destination using Robocopy, preserving dates (what flag?) and showing a progress bar
+    #    See: https://superuser.com/a/1326224
+
+
+    # TODO:
+    # 2. Rename moved file in destination to desired final name with Move-Item because Robocopy doesn't do renames
 }
 
-Export-ModuleMember -Function Move-ItemWithCreationTime
+# Export-ModuleMember -Function Move-ItemBetter
