@@ -163,7 +163,7 @@ function Compress-Video {
         $Videos = $Videos | Sort-Object Length -Descending
 
         foreach($Video in $Videos) {
-            if (-Not (Test-Path $Video)) {
+            if (-Not (Test-Path ([WildcardPattern]::Escape($Video)))) {
                 # Video was renamed/removed from under us so just continue with the next one
                 continue
             }
