@@ -40,3 +40,6 @@ function Prompt {
 # Configured by the Pshazz theme files.
 # See https://github.com/lukesampson/pshazz
 try { $null = gcm pshazz -ea stop; pshazz init } catch { }
+
+# I feel like this could break stuff
+set-alias .. cd..
