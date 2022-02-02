@@ -18,10 +18,13 @@ Import-Module MyRandomModules
 # TODO: Check that Rustup is installed
 rustup completions powershell | Out-String | Invoke-Expression
 
-# This is for messing with the console color scheme
-# https://github.com/mmims/PSConsoleTheme
-# Seems obsolete if using the new Windows Terminal, but also hopelessly broken in the old conhost.
-# Import-Module PSConsoleTheme
+# dotnet CLI completions
+Register-ArgumentCompleter -Native -CommandName dotnet -ScriptBlock {
+  param($commandName, $wordToComplete, $cursorPosition)
+  dotnet complete --position $cursorPosition "$wordToComplete" | ForEach-Object {
+    [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
+  }
+}
 
 # Starship is the fancy prompt made in Rust
 Invoke-Expression (&starship init powershell)
@@ -43,3 +46,9 @@ try { $null = gcm pshazz -ea stop; pshazz init } catch { }
 
 # I feel like this could break stuff
 set-alias .. cd..
+
+# Chocolatey profile
+$ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+if (Test-Path($ChocolateyProfile)) {
+  Import-Module "$ChocolateyProfile"
+}
